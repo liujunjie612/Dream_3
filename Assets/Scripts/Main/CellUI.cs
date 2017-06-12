@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,18 +10,14 @@ public enum StateType
     Normal,
     Hover
 }
-public class CellVo
-{
-    public StateType stateType;
-    public Vector2 position;
-}
 public class CellUI : MonoBehaviour {
 
     public Image img;
     public Sprite[] sprites;
 
+    public Action<Vector2> onClickCallback;
 
-    public CellVo vo;
+    private StateType _currentType;
 
 	void Start () 
     {
@@ -28,23 +25,28 @@ public class CellUI : MonoBehaviour {
         EventTriggerListener.Get(img.gameObject).onExit = this.__onExit;
 	}
 	
-	public void SetData(CellVo v)
+	public void SetData(StateType type)
     {
-        this.vo = v;
-        this.vo.position = img.rectTransform.anchoredPosition;
-        img.sprite = sprites[(int)vo.stateType];
-        img.rectTransform.anchoredPosition = vo.position;
+        _currentType = type;
+        img.sprite = sprites[(int)type];
     }
 
     private void __onHover(GameObject go)
     {
-        Debug.Log(img.rectTransform.anchoredPosition);
-        img.sprite = sprites[1];
+        if(_currentType == StateType.Normal)
+            img.sprite = sprites[2];
     }
 
     private void __onExit(GameObject go)
     {
-        img.sprite = sprites[0];
+        if (_currentType == StateType.Normal)
+            img.sprite = sprites[1];
+    }
+
+    private void __onClick(GameObject go)
+    {
+        if (onClickCallback != null)
+            onClickCallback(img.rectTransform.anchoredPosition);
     }
 }
 

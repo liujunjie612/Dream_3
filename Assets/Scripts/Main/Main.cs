@@ -9,6 +9,8 @@ public class Main : MonoBehaviour {
     public GameObject cellPrefab;
     public Transform parent;
 
+    public PlayerController player;
+
     private List<CellUI> _celllist = new List<CellUI>();
 
 	void Start () 
@@ -28,18 +30,24 @@ public class Main : MonoBehaviour {
             {
                 CellUI ui = Instantiate(cellPrefab).GetComponent<CellUI>();
                 ui.gameObject.transform.SetParent(parent);
-                CellVo vo = new CellVo();
-                vo.stateType = StateType.Transparent;
-                ui.SetData(vo);
-
+                ui.SetData(StateType.Transparent);
+                ui.onClickCallback = cellClick;
                 _celllist.Add(ui);
             }
         }
     }
-	
+
+    /// <summary>
+    /// 鼠标点击位置触发事件
+    /// </summary>
+    /// <param name="vec"></param>
+    private void cellClick(Vector2 vec)
+    {
+        player.SetDestination(vec);
+    }
+
 	private void __onStratClick(GameObject go)
     {
         startImg.gameObject.SetActive(false);
     }
-
 }
