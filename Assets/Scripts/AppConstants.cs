@@ -6,8 +6,8 @@ public class AppConstants
 {
     public const string MainScene = "Main";
 
-    public const int CellRowCount = 20;
-    public const int CellColumnCount = 26;
-    public const int CellWidth = 43;
+    public const int CellRowCount = 26;
+    public const int CellColumnCount = 20;
+    public const float CellWidth = 43;
 	
 }
