@@ -29,8 +29,8 @@ public class AnimationGif : MonoBehaviour
     private void OnEnable()
     {
         _continue = true;
-        _curretnTime = Time.time;
-        _index = 0;
+        _curretnTime = Time.time - animationSpeed - 1;
+        _index = -1;
     }
 
     public void SetAnimation(bool play)
@@ -44,10 +44,8 @@ public class AnimationGif : MonoBehaviour
     {
         if (_continue && Time.time - _curretnTime > animationSpeed)
         {
-            _curretnTime = Time.time;
-            _img.sprite = animationSprites[_index];
-            _img.SetNativeSize();
             _index++;
+
             if (_index >= _length)
             {
                 _index = 0;
@@ -57,6 +55,12 @@ public class AnimationGif : MonoBehaviour
                     if (animationEndCallback != null)
                         animationEndCallback();
                 }
+            }
+            else
+            {
+                _curretnTime = Time.time;
+                _img.sprite = animationSprites[_index];
+                _img.SetNativeSize();
             }
         }
     }

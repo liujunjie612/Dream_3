@@ -21,6 +21,22 @@ public class CellUI : MonoBehaviour {
     private int _xIndex;
     private int _yindex;
 
+    public int x
+    {
+        get
+        {
+            return _xIndex;
+        }
+    }
+
+    public int y
+    {
+        get
+        {
+            return _yindex;
+        }
+    }
+
 	void Start () 
     {
         EventTriggerListener.Get(img.gameObject).onEnter = this.__onHover;
