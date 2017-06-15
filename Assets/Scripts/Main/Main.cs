@@ -20,11 +20,16 @@ public class Main : MonoBehaviour {
     public Text resultTxt;
     public Button replayBtn;
 
+    public NearFightManager nearFightPanel;
+
     public PlayerController player;
     public PlayerController boss;
+    private List<PlayerController> _playerList = new List<PlayerController>();
 
     private PlayerController _currentPlayer;
     private FSType _currentFSType;
+
+    private int _playerCount = 0;
 
     private Vector2[,] _posArray;
     private List<CellUI> _usingList = new List<CellUI>();
@@ -35,17 +40,23 @@ public class Main : MonoBehaviour {
 	void Start () 
     {
         resultPanel.SetActive(false);
+        nearFightPanel.gameObject.SetActive(false);
         catchPosition();
 
+        player.id = _playerCount++; ;
         player.moveEndCallback = moveEndCallback;
         player.overCallback = this.gameOver;
         player.SetDestination(10, 0, GetPositionByIndex(10, 0), false);
         player.SetAnimation(FSType.Idel, DirectionType.Right);
 
+        boss.id = _playerCount++;
         boss.moveEndCallback = moveEndCallback;
         boss.overCallback = this.gameOver;
         boss.SetDestination(10, 25, GetPositionByIndex(10, 25), false);
         boss.SetAnimation(FSType.Idel, DirectionType.Left);
+
+        _playerList.Add(player);
+        _playerList.Add(boss);
 
         nextStep();
         //showWakableRange(10, 0);
@@ -155,14 +166,18 @@ public class Main : MonoBehaviour {
                 {
                     continue;
                 }
-                    else if(xP == x && yP == y)
+                else if (xP == x && yP == y)
+                {
+                    continue;
+                }
+                else if (getPlayerByXY(xP, yP) != null)
                 {
                     continue;
                 }
                 else
                 {
                     CellUI cell = activeCell();
-                    cell.SetData(xP, yP,StateType.Normal, GetPositionByIndex(xP, yP));
+                    cell.SetData(xP, yP, StateType.Normal, GetPositionByIndex(xP, yP));
                 }
             }
         }
@@ -176,6 +191,10 @@ public class Main : MonoBehaviour {
         {
             if(i != 0 && x + i >=0 && x + i < AppConstants.CellRowCount)
             {
+                PlayerController p = getPlayerByXY(x + i, y);
+                if (p != null && p.tag.Equals(_currentPlayer.tag))
+                    continue;
+
                 CellUI cell = activeCell();
                 cell.SetData(x+i, y, StateType.Normal, GetPositionByIndex(x+i, y));
             }
@@ -185,6 +204,10 @@ public class Main : MonoBehaviour {
         { 
             if(j != 0 && y + j >=0 && y+j <AppConstants.CellColumnCount)
             {
+                PlayerController p = getPlayerByXY(x, y + j);
+                if (p != null && p.tag.Equals(_currentPlayer.tag))
+                    continue;
+
                 CellUI cell = activeCell();
                 cell.SetData( x, y+j, StateType.Normal, GetPositionByIndex(x, y + j));
             }
@@ -211,6 +234,11 @@ public class Main : MonoBehaviour {
     {
         uiPanel.gameObject.SetActive(true);
         uiPanel.anchoredPosition = GetPositionByIndex(p.x, p.y);
+
+        if (checkMagicInRange(p, 2, 2).Count > 0)
+            magicBtn.interactable = true;
+        else
+            magicBtn.interactable = false;
     }
 
     private void __onMoveClick()
@@ -228,14 +256,64 @@ public class Main : MonoBehaviour {
     private void __onMagicClick()
     {
         uiPanel.gameObject.SetActive(false);
-        _currentPlayer.SetAnimation(FSType.Magic, _currentPlayer.currentDirectionType, 
-            () => { Debug.Log(_currentPlayer.name + "施展了魔法");
-            _currentPlayer.SetAnimation(FSType.Idel, _currentPlayer.currentDirectionType);
-            if (_step % 2 > 0)
-                boss.SetAnimation(FSType.Attacked, boss.currentDirectionType, () => { boss.SetAnimation(FSType.Idel, boss.currentDirectionType); nextStep(); });
-            else
-                player.SetAnimation(FSType.Attacked, player.currentDirectionType, () => { player.SetAnimation(FSType.Idel, player.currentDirectionType); nextStep(); });
-               });
+        _currentPlayer.SetAnimation(FSType.Magic, _currentPlayer.currentDirectionType,
+            () =>
+            {
+                Debug.Log(_currentPlayer.name + "施展了魔法");
+                _currentPlayer.SetAnimation(FSType.Idel, _currentPlayer.currentDirectionType);
+                List<PlayerController> pList = checkMagicInRange(_currentPlayer, 2 ,2);
+                for (int i = 0; i < pList.Count; i++)
+                {
+                    PlayerController p = pList[i];
+                    p.SetAnimation(FSType.Attacked, p.currentDirectionType, () => { p.SetAnimation(FSType.Idel, p.currentDirectionType); nextStep(); });
+                }
+            });
+    }
+
+    /// <summary>
+    /// 获取魔法攻击范围内的对手
+    /// </summary>
+    /// <param name="me"></param>
+    /// <param name="rangeX"></param>
+    /// <param name="rangeY"></param>
+    /// <returns></returns>
+    private List<PlayerController> checkMagicInRange(PlayerController me, int rangeX, int rangeY)
+    {
+        int x = me.x;
+        int y = me.y;
+        for (int i = -rangeX; i <= rangeX; i++)
+        {
+            if (i != 0 && x + i >= 0 && x + i < AppConstants.CellRowCount)
+            {
+                CellUI cell = activeCell();
+                cell.SetData(x + i, y, StateType.Transparent, GetPositionByIndex(x + i, y));
+            }
+        }
+
+        for (int j = -rangeY; j <= rangeY; j++)
+        {
+            if (j != 0 && y + j >= 0 && y + j < AppConstants.CellColumnCount)
+            {
+                CellUI cell = activeCell();
+                cell.SetData(x, y + j, StateType.Transparent, GetPositionByIndex(x, y + j));
+            }
+        }
+
+        List<PlayerController> pL = new List<PlayerController>();
+        for(int i=0;i<_usingList.Count;i++)
+        {
+            for(int j =0;j<_playerList.Count;j++)
+            {
+                if(_usingList[i].x == _playerList[j].x &&
+                    _usingList[i].y == _playerList[j].y &&
+                    me.tag != _playerList[j].tag)
+                {
+                    pL.Add(_playerList[j]);
+                }
+            }
+        }
+
+        return pL;
     }
 
     private void __onSkipClick()
@@ -274,24 +352,42 @@ public class Main : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// 根据X,Y来获取Player
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    private PlayerController getPlayerByXY (int x, int y)
+    {   
+        PlayerController p = null;
+        for(int i=0;i<_playerList.Count;i++)
+        {
+            if(_playerList[i].x == x && _playerList[i].y == y)
+            {
+                p = _playerList[i];
+                break;
+            }
+        }
+
+        return p;
+    }
+
     private void attack(int x, int y)
     {
-        PlayerController p = null;
-        if (_step % 2 > 0)
-            p = boss;
-        else
-            p = player;
+        PlayerController p = getPlayerByXY(x, y);
 
-        if(x == p.x && y == p.y)
+        if(p != null && !p.tag.Equals(_currentPlayer))
         {
-            Debug.Log("攻击：" + p.name);
+            nearFightPanel.gameObject.SetActive(true);
+            nearFightPanel.SetFight(p.identityType, p.SetDamege);
         }
     }
 
     private void gameOver(string tag)
     {
         resultPanel.SetActive(true);
-        if (tag == "Player")
+        if (tag.Equals("Player"))
             resultTxt.text = "失败";
         else
             resultTxt.text = "胜利";

@@ -31,10 +31,19 @@ public enum FSType
     Defeat
 }
 
+public enum IdentityType
+{
+    Player,
+    Enemy
+}
+
 public class PlayerController : MonoBehaviour
 {
     public Action moveEndCallback;
     public Action<string> overCallback;
+
+    public IdentityType identityType;
+    public int id;
 
     public AnimationGif[] idleAniArray;
     public AnimationGif[] walkAniArray;
@@ -208,6 +217,14 @@ public class PlayerController : MonoBehaviour
         if (_hp <= 0 && overCallback != null)
             overCallback(this.tag);
 
+    }
+
+    public void SetDamege(int damege)
+    {
+        _hp -= damege;
+
+        if (_hp <= 0 && overCallback != null)
+            overCallback(this.tag);
     }
 
     private void setAniDefault()
