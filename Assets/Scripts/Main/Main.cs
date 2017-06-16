@@ -214,19 +214,164 @@ public class Main : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// 是否在攻击范围内
+    /// </summary>
+    /// <param name="me"></param>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <returns></returns>
+    private List<PlayerController> checkAttackInRange(PlayerController me, int rangeX, int rangeY)
+    {
+        int x = me.x;
+        int y = me.y;
+
+        List<CellVo> list = new List<CellVo>();
+        for (int i = -rangeX; i <= rangeX; i++)
+        {
+            if (i != 0 && x + i >= 0 && x + i < AppConstants.CellRowCount)
+            {
+                CellVo v = new CellVo();
+                v.x = x + i;
+                v.y = y;
+                list.Add(v);
+            }
+        }
+
+        for (int j = -rangeY; j <= rangeY; j++)
+        {
+            if (j != 0 && y + j >= 0 && y + j < AppConstants.CellColumnCount)
+            {
+                CellVo v = new CellVo();
+                v.x = x;
+                v.y = y + j;
+                list.Add(v);
+            }
+        }
+
+        List<PlayerController> pL = new List<PlayerController>();
+        for (int i = 0; i < list.Count; i++)
+        {
+            for (int j = 0; j < _playerList.Count; j++)
+            {
+                if (list[i].x == _playerList[j].x &&
+                    list[i].y == _playerList[j].y &&
+                    me.identityType != _playerList[j].identityType)
+                {
+                    pL.Add(_playerList[j]);
+                }
+            }
+        }
+
+        return pL;
+              
+    }
+
     private void nextStep()
     {
         _step++;
         if (_step % 2 > 0)
         {
             _currentPlayer = player;
+            showUIPanel(_currentPlayer);
         }
         else
         {
             _currentPlayer = boss;
+            bossAI();
+        }
+    }
+
+
+    private void bossAI()
+    {
+        bool inMagic = checkMagicInRange(boss, 2, 2).Count > 0;
+        bool inAttack = checkAttackInRange(boss, 4, 4).Count > 0;
+
+        FSType t = FSType.Idel;
+
+        if(!inMagic && !inAttack)
+        {
+            t = FSType.Walk;
+        }
+        else if(inMagic && !inAttack)
+        {
+            int index = Random.Range(0, 6);
+            if(index == 0)
+            {
+                t = FSType.Walk;
+            }
+            else
+            {
+                t = FSType.Magic;
+            }
+        }
+        else if(!inMagic && inAttack)
+        {
+             int index = Random.Range(0, 6);
+             if (index == 0)
+             {
+                 t = FSType.Walk;
+             }
+             else
+             {
+                 t = FSType.Attack;
+             }
+        }
+        else
+        {
+            int index = Random.Range(0, 10);
+
+            if (index <= 5)
+                t = FSType.Attack;
+            else if (index <= 8)
+                t = FSType.Magic;
+            else
+                t = FSType.Walk;
         }
 
-        showUIPanel(_currentPlayer);
+        switch (t)
+        {
+            case FSType.Walk:
+                 showWakableRange(boss.x, boss.y);
+                 int index2 = Random.Range(0, _usingList.Count);
+
+                 boss.SetDestination(_usingList[index2].x, _usingList[index2].y, GetPositionByIndex(_usingList[index2].x, _usingList[index2].y));
+                break;
+            case FSType.Attack:
+                 List<PlayerController> list = checkAttackInRange(boss, 4, 4);
+                 int index3 = Random.Range(0, list.Count);
+                 PlayerController p = list[index3];
+
+                 if (p != null && !p.tag.Equals(boss.identityType))
+                 {
+                     nearFightPanel.gameObject.SetActive(true);
+                     nearFightPanel.SetFight(boss.identityType, p.SetDamege);
+
+                     Debug.Log(p.name + "  " + p.identityType);
+                     catchAllCell();
+                     nextStep();
+                 }
+                break;
+            case FSType.Magic:
+                boss.SetAnimation(FSType.Magic, boss.currentDirectionType,
+                   () =>
+                   {
+                       Debug.Log(_currentPlayer.name + "施展了魔法");
+                       boss.SetAnimation(FSType.Idel, boss.currentDirectionType);
+                       List<PlayerController> pList = checkMagicInRange(boss, 2, 2);
+                       for (int i = 0; i < pList.Count; i++)
+                       {
+                           PlayerController p2 = pList[i];
+                           p2.SetAnimation(FSType.Attacked, p2.currentDirectionType, () => { p2.SetAnimation(FSType.Idel, p2.currentDirectionType); nextStep(); });
+                       }
+                   });
+                break;
+            default:
+                break;
+        }
+
+
     }
 
 
