@@ -74,4 +74,10 @@ public class CellUI : MonoBehaviour {
     }
 }
 
+public class CellVo
+{
+    public int x;
+    public int y;
+}
+
 

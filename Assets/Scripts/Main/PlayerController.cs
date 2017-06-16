@@ -57,6 +57,7 @@ public class PlayerController : MonoBehaviour
     private Vector2 _destinationPos;
 
     private bool _canMove = false;
+    private bool _firstSet = true;
 
     private float _moveSpeed = 0.2f;
     private MoveType _moveType;
@@ -110,7 +111,7 @@ public class PlayerController : MonoBehaviour
                     p.x += AppConstants.CellWidth;
                     _playerTransform.anchoredPosition = p;
 
-                    if (_currentDirectionType != DirectionType.Right)
+                    if (_firstSet || _currentDirectionType != DirectionType.Right)
                         SetAnimation(FSType.Walk, DirectionType.Right);
                 }
                 else if (_destinationPos.x - _playerTransform.anchoredPosition.x < -AppConstants.CellWidth / 2)
@@ -119,7 +120,7 @@ public class PlayerController : MonoBehaviour
                     p.x -= AppConstants.CellWidth;
                     _playerTransform.anchoredPosition = p;
 
-                    if (_currentDirectionType != DirectionType.Left)
+                    if (_firstSet || _currentDirectionType != DirectionType.Left)
                         SetAnimation(FSType.Walk, DirectionType.Left);
                 }
                 else if (_destinationPos.y - _playerTransform.anchoredPosition.y > AppConstants.CellWidth / 2)
@@ -128,7 +129,7 @@ public class PlayerController : MonoBehaviour
                     p.y += AppConstants.CellWidth;
                     _playerTransform.anchoredPosition = p;
 
-                    if (_currentDirectionType != DirectionType.Back)
+                    if (_firstSet || _currentDirectionType != DirectionType.Back)
                         SetAnimation(FSType.Walk, DirectionType.Back);
                 }
                 else if (_destinationPos.y - _playerTransform.anchoredPosition.y < -AppConstants.CellWidth / 2)
@@ -137,7 +138,7 @@ public class PlayerController : MonoBehaviour
                     p.y -= AppConstants.CellWidth;
                     _playerTransform.anchoredPosition = p;
 
-                    if (_currentDirectionType != DirectionType.Forward)
+                    if (_firstSet || _currentDirectionType != DirectionType.Forward)
                         SetAnimation(FSType.Walk, DirectionType.Forward);
                 }
                 else
@@ -146,11 +147,12 @@ public class PlayerController : MonoBehaviour
                     if (moveEndCallback != null)
                         moveEndCallback();
 
-                    if (_currentFSType != FSType.Idel)
+                    if (_firstSet || _currentFSType != FSType.Idel)
                         SetAnimation(FSType.Idel, _currentDirectionType);
                 }
 
                 _currentTime = Time.time;
+                _firstSet = false;
             }
         }
     }
@@ -164,6 +166,7 @@ public class PlayerController : MonoBehaviour
 
             _destinationPos = pos;
             _canMove = true;
+            _firstSet = true;
             _currentTime = Time.time;
         }
         else

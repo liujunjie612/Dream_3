@@ -99,9 +99,9 @@ public class NearFightManager : MonoBehaviour {
                     bossDefeat.gameObject.SetActive(true);
 
                 hpTxt.gameObject.SetActive(true);
-                hpTxt.rectTransform.anchoredPosition = new Vector2 (600,0);
+                hpTxt.rectTransform.anchoredPosition = new Vector2 (300,140);
                 hpTxt.text = "-" + hurt;
-                Tweener t = hpTxt.rectTransform.DOLocalMoveY(160, 1f);
+                Tweener t = hpTxt.rectTransform.DOLocalMoveY(180, 1f);
                 t.OnComplete(() =>
                 { 
                     this.gameObject.SetActive(false);
@@ -145,9 +145,9 @@ public class NearFightManager : MonoBehaviour {
                 bossDefeat.gameObject.SetActive(true);
 
             hpTxt.gameObject.SetActive(true);
-            hpTxt.rectTransform.anchoredPosition = new Vector2(600, 0);
+            hpTxt.rectTransform.anchoredPosition = new Vector2(300, 140);
             hpTxt.text = "-" + hurt;
-            Tweener t = hpTxt.rectTransform.DOLocalMoveY(160, 1f);
+            Tweener t = hpTxt.rectTransform.DOLocalMoveY(180, 1f);
             t.OnComplete(() =>
             {
                 this.gameObject.SetActive(false);
@@ -182,9 +182,9 @@ public class NearFightManager : MonoBehaviour {
                 wsDefeat.gameObject.SetActive(true);
 
             hpTxt.gameObject.SetActive(true);
-            hpTxt.rectTransform.anchoredPosition = new Vector2(600, 0);
+            hpTxt.rectTransform.anchoredPosition = new Vector2(300, 140);
             hpTxt.text = "-" + hurt;
-            Tweener t = hpTxt.rectTransform.DOLocalMoveY(160, 1f);
+            Tweener t = hpTxt.rectTransform.DOLocalMoveY(180, 1f);
             t.OnComplete(() =>
             {
                 this.gameObject.SetActive(false);
@@ -219,9 +219,9 @@ public class NearFightManager : MonoBehaviour {
                 wsDefeat.gameObject.SetActive(true);
 
             hpTxt.gameObject.SetActive(true);
-            hpTxt.rectTransform.anchoredPosition = new Vector2(600, 0);
+            hpTxt.rectTransform.anchoredPosition = new Vector2(300, 140);
             hpTxt.text = "-" + hurt;
-            Tweener t = hpTxt.rectTransform.DOLocalMoveY(160, 1f);
+            Tweener t = hpTxt.rectTransform.DOLocalMoveY(180, 1f);
             t.OnComplete(() =>
             {
                 this.gameObject.SetActive(false);
@@ -252,5 +252,6 @@ public class NearFightManager : MonoBehaviour {
         attack2Btn.gameObject.SetActive(false);
         evadeBtn.gameObject.SetActive(false);
         defenseBtn.gameObject.SetActive(false);
+        hpTxt.gameObject.SetActive(false);
     }
 }

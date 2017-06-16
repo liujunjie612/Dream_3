@@ -281,12 +281,16 @@ public class Main : MonoBehaviour {
     {
         int x = me.x;
         int y = me.y;
+
+        List<CellVo> list = new List<CellVo>();
         for (int i = -rangeX; i <= rangeX; i++)
         {
             if (i != 0 && x + i >= 0 && x + i < AppConstants.CellRowCount)
             {
-                CellUI cell = activeCell();
-                cell.SetData(x + i, y, StateType.Transparent, GetPositionByIndex(x + i, y));
+                CellVo v = new CellVo();
+                v.x = x + i;
+                v.y = y;
+                list.Add(v);
             }
         }
 
@@ -294,18 +298,20 @@ public class Main : MonoBehaviour {
         {
             if (j != 0 && y + j >= 0 && y + j < AppConstants.CellColumnCount)
             {
-                CellUI cell = activeCell();
-                cell.SetData(x, y + j, StateType.Transparent, GetPositionByIndex(x, y + j));
+                CellVo v = new CellVo();
+                v.x = x;
+                v.y = y + j;
+                list.Add(v);
             }
         }
 
         List<PlayerController> pL = new List<PlayerController>();
-        for(int i=0;i<_usingList.Count;i++)
+        for (int i = 0; i < list.Count; i++)
         {
             for(int j =0;j<_playerList.Count;j++)
             {
-                if(_usingList[i].x == _playerList[j].x &&
-                    _usingList[i].y == _playerList[j].y &&
+                if (list[i].x == _playerList[j].x &&
+                    list[i].y == _playerList[j].y &&
                     me.tag != _playerList[j].tag)
                 {
                     pL.Add(_playerList[j]);
@@ -380,7 +386,11 @@ public class Main : MonoBehaviour {
         if(p != null && !p.tag.Equals(_currentPlayer))
         {
             nearFightPanel.gameObject.SetActive(true);
-            nearFightPanel.SetFight(p.identityType, p.SetDamege);
+            nearFightPanel.SetFight(_currentPlayer.identityType, p.SetDamege);
+
+            Debug.Log(p.name + "  " + p.identityType);
+            catchAllCell();
+            nextStep();
         }
     }
 
