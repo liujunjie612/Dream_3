@@ -278,6 +278,7 @@ public class Main : MonoBehaviour {
         else
         {
             _currentPlayer = boss;
+            uiPanel.gameObject.SetActive(false);
             bossAI();
         }
     }
@@ -333,12 +334,14 @@ public class Main : MonoBehaviour {
         switch (t)
         {
             case FSType.Walk:
+                Debug.Log("walk");
                  showWakableRange(boss.x, boss.y);
                  int index2 = Random.Range(0, _usingList.Count);
 
                  boss.SetDestination(_usingList[index2].x, _usingList[index2].y, GetPositionByIndex(_usingList[index2].x, _usingList[index2].y));
                 break;
             case FSType.Attack:
+                Debug.Log("attack");
                  List<PlayerController> list = checkAttackInRange(boss, 4, 4);
                  int index3 = Random.Range(0, list.Count);
                  PlayerController p = list[index3];
@@ -346,7 +349,7 @@ public class Main : MonoBehaviour {
                  if (p != null && !p.tag.Equals(boss.identityType))
                  {
                      nearFightPanel.gameObject.SetActive(true);
-                     nearFightPanel.SetFight(boss.identityType, p.SetDamege);
+                     nearFightPanel.SetFight(boss.identityType, (int d) => { p.SetDamege(d); });
 
                      Debug.Log(p.name + "  " + p.identityType);
                      catchAllCell();
@@ -354,6 +357,7 @@ public class Main : MonoBehaviour {
                  }
                 break;
             case FSType.Magic:
+                Debug.Log("magic");
                 boss.SetAnimation(FSType.Magic, boss.currentDirectionType,
                    () =>
                    {
@@ -531,11 +535,16 @@ public class Main : MonoBehaviour {
         if(p != null && !p.tag.Equals(_currentPlayer))
         {
             nearFightPanel.gameObject.SetActive(true);
-            nearFightPanel.SetFight(_currentPlayer.identityType, p.SetDamege);
+            nearFightPanel.SetFight(_currentPlayer.identityType, (int d) => 
+            {
+                if (!p.SetDamege(d))
+                    nextStep();
+            });
 
-            Debug.Log(p.name + "  " + p.identityType);
+            Debug.Log("攻击者：" + _currentPlayer.name + "  " + _currentPlayer.identityType + "被攻击者：" + p.name + "  " + p.identityType);
             catchAllCell();
-            nextStep();
+            uiPanel.gameObject.SetActive(false);
+            //nextStep();
         }
     }
 

@@ -222,12 +222,19 @@ public class PlayerController : MonoBehaviour
 
     }
 
-    public void SetDamege(int damege)
+    public bool SetDamege(int damege)
     {
         _hp -= damege;
 
         if (_hp <= 0 && overCallback != null)
+        {
             overCallback(this.tag);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     private void setAniDefault()
